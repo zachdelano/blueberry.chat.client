@@ -30,11 +30,12 @@
 
     <v-footer app>
       <v-textarea
-          @keyup.enter="sendMessage($event.target.value)"
+          @keydown.enter.prevent="sendMessage($event.target.value)"
           prepend-inner-icon="mdi-comment"
           class="mx-2"
           label="prepend-inner-icon"
           rows="1"
+          v-model="message"
       ></v-textarea>
     </v-footer>
   </v-container>
@@ -60,13 +61,20 @@ export default defineComponent({
   },
   methods: {
     sendMessage(message: string) {
-      this.socket?.emit('chat', [message])
+      if (this.socket) {
+        this.socket.emit('chat', [message])
+        this.clearInput()
+      }
+    },
+    clearInput() {
+      this.message = ''
     }
   },
   data () {
     return {
       socket: null as Socket | null,
-      messages: [] as string[]
+      messages: [] as string[],
+      message: ''
     }
   },
 })
