@@ -16,6 +16,7 @@
         <v-row
           v-for="(message, idx) in messages"
           v-bind:key="idx"
+          style="padding-bottom: 20px"
         >
           <v-chip>
             {{ message }}
