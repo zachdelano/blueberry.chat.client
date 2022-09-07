@@ -1,7 +1,13 @@
 <template>
   <v-container>
-    <v-navigation-drawer app>
-      <!-- -->
+    <v-navigation-drawer
+      permanent
+      app
+    >
+      <v-btn
+        variant="flat"
+        @click="joinRoom('number1')"
+      >Room 1</v-btn>
     </v-navigation-drawer>
 
     <v-app-bar app>
@@ -33,7 +39,6 @@
           @keydown.enter.prevent="sendMessage($event.target.value)"
           prepend-inner-icon="mdi-comment"
           class="mx-2"
-          label="prepend-inner-icon"
           rows="1"
           v-model="message"
       ></v-textarea>
@@ -58,6 +63,12 @@ export default defineComponent({
           vm.messages.push(thing[0])
         })
     }
+    if (!this.spaceSocket) {
+      this.spaceSocket = io('ws://localhost:3000/space/test_namespace')
+        .on('message', _msg => {
+          // console.log(_msg)
+        })
+    }
   },
   methods: {
     sendMessage(message: string) {
@@ -68,11 +79,17 @@ export default defineComponent({
     },
     clearInput() {
       this.message = ''
+    },
+    joinRoom(room: string) {
+      if (this.spaceSocket) {
+        this.spaceSocket.emit('join_room', room)
+      }
     }
   },
   data () {
     return {
       socket: null as Socket | null,
+      spaceSocket: null as Socket | null,
       messages: [] as string[],
       message: ''
     }
