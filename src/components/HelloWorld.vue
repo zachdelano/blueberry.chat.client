@@ -8,6 +8,10 @@
         variant="flat"
         @click="joinRoom('number1')"
       >Room 1</v-btn>
+      <v-btn
+        variant="flat"
+        @click="joinRoom('number2')"
+      >Room 2</v-btn>
     </v-navigation-drawer>
 
     <v-app-bar app>
@@ -55,25 +59,17 @@ export default defineComponent({
 
   mounted() {
     const vm = this
-    if (!this.socket) {
-      this.socket = io('ws://localhost:3000')
-        // .on('getId', id => {
-        // })
-        .on('sendChat', thing => {
-          vm.messages.push(thing[0])
-        })
-    }
     if (!this.spaceSocket) {
       this.spaceSocket = io('ws://localhost:3000/space/test_namespace')
-        .on('message', _msg => {
-          // console.log(_msg)
+        .on('message_room', (_room, message) => {
+          vm.messages.push(message)
         })
     }
   },
   methods: {
     sendMessage(message: string) {
-      if (this.socket) {
-        this.socket.emit('chat', [message])
+      if (this.spaceSocket) {
+        this.spaceSocket.emit('message_room', this.currentRoom, message)
         this.clearInput()
       }
     },
@@ -83,14 +79,17 @@ export default defineComponent({
     joinRoom(room: string) {
       if (this.spaceSocket) {
         this.spaceSocket.emit('join_room', room)
+        this.currentRoom = room
+        this.joinedRooms.add(room)
       }
     }
   },
   data () {
     return {
-      socket: null as Socket | null,
       spaceSocket: null as Socket | null,
       messages: [] as string[],
+      joinedRooms: new Set<string>(),
+      currentRoom: '',
       message: ''
     }
   },
